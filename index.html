@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>遊艇及附屬設備智能管理系統 - 全功能互動控制台</title>
+    <title>遊艇及附屬設備智能管理系統 - 專業寬屏控制台</title>
     <!-- Tailwind CSS Play CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -70,7 +70,7 @@
 
     <div class="flex h-screen overflow-hidden">
         
-        <!-- SIDEBAR NAVIGATION -->
+        <!-- SIDEBAR NAVIGATION (固定寬度，提供穩定的操作儀表) -->
         <aside class="w-64 bg-navy-950/80 border-r border-gold/15 flex flex-col justify-between backdrop-blur-md shrink-0">
             <div>
                 <!-- System Header Logo -->
@@ -110,7 +110,7 @@
                     </button>
                     <button onclick="switchTab('inventory')" id="nav-inventory" class="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium text-slate-400 hover:bg-navy-800/50 hover:text-slate-100 transition-all duration-200 border-l-4 border-transparent">
                         <i class="fa-solid fa-boxes-stacked w-5"></i>
-                        <span>常備物資與採購單</span>
+                        <span>遊艇生活與洗船物資</span>
                     </button>
                     <button onclick="switchTab('typhoon')" id="nav-typhoon" class="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium text-slate-400 hover:bg-navy-800/50 hover:text-slate-100 transition-all duration-200 border-l-4 border-transparent">
                         <i class="fa-solid fa-cloud-bolt w-5"></i>
@@ -125,11 +125,10 @@
                     <span>系統基準日期:</span>
                     <span class="text-gold font-mono" id="current-system-date">2026-07-05</span>
                 </div>
-                <div>Fleet Control Platform v2.3</div>
+                <div>Fleet Control Platform v2.4</div>
             </div>
         </aside>
 
-        <!-- MAIN CONTENT WORKSPACE -->
         <main class="flex-1 flex flex-col overflow-hidden bg-navy-950/30 min-w-0">
             <!-- Topbar (Header info) -->
             <header class="h-16 border-b border-gold/10 flex items-center justify-between px-8 bg-navy-900/60 backdrop-blur-md shrink-0">
@@ -269,7 +268,7 @@
                         </button>
                     </div>
 
-                    <!-- Yacht Hero Display (IMG_0265.jpg Reference) -->
+                    <!-- Yacht Hero Display -->
                     <div class="bg-navy-900/40 border border-gold/20 rounded-xl overflow-hidden p-6 grid grid-cols-1 lg:grid-cols-3 gap-8 items-center animate-fade-in">
                         <div class="lg:col-span-1">
                             <img src="IMG_0265.jpg" alt="Sanlorenzo SX76" class="w-full h-48 object-cover rounded-lg border border-gold/20 shadow-lg" onerror="this.src='https://images.presentationgo.com/2025/09/aerial-view-cruise-ship.jpg';">
@@ -490,14 +489,23 @@
 
                 <!-- ================= 7. INVENTORY & SHOPPING LIST ================= -->
                 <div id="tab-inventory" class="space-y-6 hidden">
-                    <div class="flex justify-between items-center">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                         <div>
-                            <h3 class="text-lg font-bold text-slate-200">遊艇生活與洗船物資水位（自動採購系統）</h3>
+                            <h3 class="text-lg font-bold text-slate-200">遊艇生活與洗船物資（自動採購系統）</h3>
                             <p class="text-xs text-slate-400">追蹤常備廁紙、飲用水、洗船及拋光上蠟用品。低於安全水位時自動生成港幣採購估算表</p>
                         </div>
-                        <button onclick="openAddModal('adjust-inventory-modal', '修改常備庫存存量', '修正庫存數據')" class="bg-gold hover:bg-gold-dark text-navy-950 text-xs font-bold px-4 py-2 rounded-lg transition-all flex items-center gap-1.5">
-                            <i class="fa-solid fa-sliders"></i> 調整現有庫存
-                        </button>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <button onclick="downloadInventoryTemplate()" class="bg-navy-800 hover:bg-navy-700 border border-gold/30 hover:border-gold text-gold text-xs font-bold px-3 py-2 rounded-lg transition-all flex items-center gap-1.5 shadow-md">
+                                <i class="fa-solid fa-file-arrow-down"></i> 下載採購登記範本
+                            </button>
+                            <label for="inventory-excel-upload" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-3 py-2 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer shadow-md">
+                                <i class="fa-solid fa-file-excel"></i> 導入已購物品 Excel
+                            </label>
+                            <input type="file" id="inventory-excel-upload" accept=".xlsx, .xls" class="hidden" onchange="handleInventoryExcelUpload(event)">
+                            <button onclick="openAddModal('adjust-inventory-modal', '修改常備庫存存量', '修正庫存數據')" class="bg-gold hover:bg-gold-dark text-navy-950 text-xs font-bold px-4 py-2 rounded-lg transition-all flex items-center gap-1.5 shadow-md">
+                                <i class="fa-solid fa-sliders"></i> 調整現有庫存
+                            </button>
+                        </div>
                     </div>
 
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -954,13 +962,7 @@
             const ws = XLSX.utils.aoa_to_sheet(worksheetData);
             
             const colWidths = [
-                { wch: 22 }, // Date
-                { wch: 35 }, // Vessel
-                { wch: 45 }, // Route
-                { wch: 25 }, // Engine Hours
-                { wch: 20 }, // Fuel
-                { wch: 18 }, // Crew
-                { wch: 55 }  // Remarks
+                { wch: 22 }, { wch: 35 }, { wch: 45 }, { wch: 25 }, { wch: 20 }, { wch: 18 }, { wch: 55 }
             ];
             ws['!cols'] = colWidths;
 
@@ -990,12 +992,12 @@
                     
                     headers.forEach((header, index) => {
                         if (header.includes("日期") || header.toLowerCase().includes("date")) dateIdx = index;
-                        if (header.includes("載具") || header.includes("載具") || header.toLowerCase().includes("vessel") || header.toLowerCase().includes("asset")) assetIdx = index;
-                        if (header.includes("路線") || header.includes("路線") || header.toLowerCase().includes("route") || header.toLowerCase().includes("destination")) routeIdx = index;
-                        if (header.includes("時數") || header.includes("時數") || header.toLowerCase().includes("hour")) hoursIdx = index;
+                        if (header.includes("載具") || header.toLowerCase().includes("vessel") || header.toLowerCase().includes("asset")) assetIdx = index;
+                        if (header.includes("路線") || header.toLowerCase().includes("route") || header.toLowerCase().includes("destination")) routeIdx = index;
+                        if (header.includes("時數") || header.toLowerCase().includes("hour")) hoursIdx = index;
                         if (header.includes("油") || header.toLowerCase().includes("fuel")) fuelIdx = index;
                         if (header.includes("船長") || header.includes("水手") || header.toLowerCase().includes("skipper") || header.toLowerCase().includes("crew")) skipperIdx = index;
-                        if (header.includes("備註") || header.includes("備註") || header.toLowerCase().includes("remark") || header.toLowerCase().includes("weather")) remarksIdx = index;
+                        if (header.includes("備註") || header.toLowerCase().includes("remark") || header.toLowerCase().includes("weather")) remarksIdx = index;
                     });
 
                     if (dateIdx === -1) dateIdx = 0;
@@ -1060,6 +1062,125 @@
             event.target.value = '';
         }
 
+        function downloadInventoryTemplate() {
+            const headers = [
+                "物品名稱 (必須與系統內現有名稱相同，或輸入新項目名稱)",
+                "已購數量 (請填寫純數字)",
+                "安全水位 (可不填，僅適用於新項目)",
+                "預估單價 (可不填，僅適用於新項目)",
+                "物資分類 (生活消耗品 / 洗船及清潔用品 / 安全物資)",
+                "補貨渠道/供應商"
+            ];
+            const sampleRows = [
+                ["豪華船用環保易分解廁紙 (48卷/箱)", 10, 10, 180, "生活消耗品", "HKTVmall 採購配送"],
+                ["屈臣氏 4.5L 桶裝純淨蒸餾水", 20, 15, 25, "生活消耗品", "屈臣氏蒸餾水直銷代理"],
+                ["Meguiar's Premium 船用高光澤洗船清潔水", 5, 4, 320, "洗船及清潔用品", "香港仔萬里船具店"],
+                ["新增超細纖維洗船抹布 (10條裝)", 3, 2, 90, "洗船及清潔用品", "香港仔萬里船具店"]
+            ];
+
+            const worksheetData = [headers, ...sampleRows];
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.aoa_to_sheet(worksheetData);
+            
+            const colWidths = [
+                { wch: 45 }, { wch: 22 }, { wch: 22 }, { wch: 22 }, { wch: 30 }, { wch: 30 }
+            ];
+            ws['!cols'] = colWidths;
+
+            XLSX.utils.book_append_sheet(wb, ws, "已購物品入庫登記");
+            XLSX.writeFile(wb, `Yacht_Supplies_Purchase_Template.xlsx`);
+        }
+
+        function handleInventoryExcelUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                    if (rows.length <= 1) {
+                        alertMessage("匯入失敗：Excel 檔案中無有效數據！", "red");
+                        return;
+                    }
+
+                    const headers = rows[0].map(h => String(h || '').trim());
+                    let nameIdx = -1, qtyIdx = -1, safetyIdx = -1, priceIdx = -1, catIdx = -1, supplierIdx = -1;
+
+                    headers.forEach((header, index) => {
+                        if (header.includes("名稱") || header.toLowerCase().includes("name")) nameIdx = index;
+                        if (header.includes("數量") || header.includes("購入") || header.toLowerCase().includes("qty") || header.toLowerCase().includes("quantity")) qtyIdx = index;
+                        if (header.includes("水位") || header.toLowerCase().includes("safety")) safetyIdx = index;
+                        if (header.includes("單價") || header.toLowerCase().includes("price")) priceIdx = index;
+                        if (header.includes("分類") || header.toLowerCase().includes("category")) catIdx = index;
+                        if (header.includes("渠道") || header.includes("供應商") || header.toLowerCase().includes("supplier")) supplierIdx = index;
+                    });
+
+                    if (nameIdx === -1) nameIdx = 0;
+                    if (qtyIdx === -1) qtyIdx = 1;
+                    if (safetyIdx === -1) safetyIdx = 2;
+                    if (priceIdx === -1) priceIdx = 3;
+                    if (catIdx === -1) catIdx = 4;
+                    if (supplierIdx === -1) supplierIdx = 5;
+
+                    let updatedCount = 0;
+                    let addedCount = 0;
+
+                    for (let i = 1; i < rows.length; i++) {
+                        const row = rows[i];
+                        if (!row || row.length === 0 || !row[nameIdx]) continue;
+
+                        const itemName = String(row[nameIdx]).trim();
+                        const addQty = parseFloat(row[qtyIdx]) || 0;
+                        if (addQty <= 0) continue;
+
+                        // 比對現有物品
+                        const existingItem = systemState.inventory.find(inv => inv.name.toLowerCase() === itemName.toLowerCase() || inv.name.includes(itemName));
+                        
+                        if (existingItem) {
+                            existingItem.current += addQty;
+                            updatedCount++;
+                        } else {
+                            // 找不到則動態新增項目
+                            const newId = 'i_new_' + Date.now() + '_' + i;
+                            const cat = String(row[catIdx] || '生活消耗品').trim();
+                            const safetyVal = parseFloat(row[safetyIdx]) || 5;
+                            const priceVal = parseFloat(row[priceIdx]) || 100;
+                            const supplierVal = String(row[supplierIdx] || '本地船具商採購').trim();
+                            
+                            systemState.inventory.push({
+                                id: newId,
+                                name: itemName,
+                                category: cat,
+                                current: addQty,
+                                safety: safetyVal,
+                                unit: '件',
+                                price: priceVal,
+                                supplier: supplierVal
+                            });
+                            addedCount++;
+                        }
+                    }
+
+                    initApp();
+                    if (updatedCount > 0 || addedCount > 0) {
+                        alertMessage(`成功自 Excel 導入已購物品！更新了 ${updatedCount} 項物資庫存，並新增了 ${addedCount} 個新品項。`, "emerald");
+                    } else {
+                        alertMessage("Excel 解析成功，但未偵測到任何大於 0 的採購數量項目。", "gold");
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alertMessage("解析已購物品 Excel 失敗，請確認資料結構與登記範本相同！", "red");
+                }
+            };
+            reader.readAsArrayBuffer(file);
+            event.target.value = '';
+        }
+
         function alertMessage(msg, colorClass = "gold") {
             let toast = document.getElementById('system-toast-alert');
             if (!toast) {
@@ -1081,9 +1202,11 @@
             }
             
             setTimeout(() => {
-                toast.className += ' translate-y-[-20px] opacity-0 pointer-events-none';
-                setTimeout(() => { if(toast) toast.remove(); }, 300);
-            }, 4000);
+                if (toast) {
+                    toast.className += ' translate-y-[-20px] opacity-0 pointer-events-none';
+                    setTimeout(() => { if(toast) toast.remove(); }, 300);
+                }
+            }, 5000);
         }
 
         // Document Ready Initialization
@@ -1137,7 +1260,6 @@
             });
         }
 
-        // Tab Switch Controller
         function switchTab(tabId) {
             const navItems = document.querySelectorAll('#sidebar-nav button');
             navItems.forEach(item => {
@@ -1167,7 +1289,7 @@
                 maintenance: 'Maintenance / 維修保養與預算',
                 licenses: 'Licensing / 證照及保險提醒',
                 fuel: 'Fuel Trend / 燃料營運價格',
-                inventory: 'Inventory / 常備物資與採購單',
+                inventory: 'Inventory / 遊艇生活與洗船物資',
                 typhoon: 'Typhoon SOP / 應急指揮所'
             };
             const parts = badgeMap[tabId].split(' / ');
@@ -1354,7 +1476,6 @@
             }
         }
 
-        // Add or Edit item submit controller
         function handleFormSubmit(event, type) {
             event.preventDefault();
             if (type === 'asset') {
@@ -1526,7 +1647,6 @@
             document.getElementById('confirm-modal').classList.remove('hidden');
         }
 
-        // Interactive checkbox toggle for typhoon SOP steps
         function toggleTyphoonStep(stepId) {
             const step = systemState.typhoonSop.find(s => s.id === stepId);
             if (step) {
@@ -1942,7 +2062,6 @@
             document.getElementById('shopping-total-price').textContent = 'HK$ ' + totalShoppingBudget.toLocaleString();
         }
 
-        // Render Typhoon SOP Steps and Contacts dynamically
         function renderTyphoonSop() {
             const t1t3Container = document.getElementById('typhoon-t1t3-list');
             const t8plusContainer = document.getElementById('typhoon-t8plus-list');
@@ -1999,7 +2118,3 @@
     </script>
 </body>
 </html>
-```
-eof
-
-I have fully incorporated all the detailed real-world fleet specifications, license validity dates, insurance policy details (including the $1B liability), and mapped the appropriate imagery as instructed! You can now test it live using the Preview button.
